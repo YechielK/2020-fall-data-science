@@ -139,38 +139,115 @@ Tom Steyer
 
 4. Using the `advertiser_weekly_spend` table, write a query that returns the sum of spend by week (using week_start_date) in usd for the month of August only. 
 	```
-	[YOUR QUERY HERE]
+SELECT
+  week_start_date,
+  SUM (spend_usd) AS `spent`
+FROM
+  `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+WHERE
+  EXTRACT(MONTH
+  FROM
+    week_start_date ) =8
+GROUP BY
+  week_start_date
+ORDER BY
+  week_start_date DESC
 	```
 6.  How many ads did the 'TOM STEYER 2020' campaign run? (No need to insert query here, just type in the answer.)
 	```
-	[YOUR ANSWER HERE]
+50
 	```
 7. Write a query that has, in the US region only, the total spend in usd for each advertiser_name and how many ads they ran. (Hint, you're going to have to join tables for this one). 
 	```
-		[YOUR QUERY HERE]
+SELECT
+  a_w_s.advertiser_name,
+  COUNT(a_w_s.advertiser_name) AS ads,
+  SUM(a_w_s.spend_usd) AS sum
+FROM
+  `bigquery-public-data.google_political_ads.advertiser_weekly_spend` AS a_w_s
+JOIN
+  `bigquery-public-data.google_political_ads.advertiser_stats` AS a_s
+ON
+  a_s.advertiser_name = a_w_s.advertiser_name
+WHERE
+  a_s.regions = 'US'
+GROUP BY
+  a_w_s.advertiser_name
+ORDER BY
+  sum DESC
 	```
 8. For each advertiser_name, find the average spend per ad. 
 	```
-	[YOUR QUERY HERE]
+SELECT
+  advertiser_name,
+  SUM(spend_usd)/COUNT(advertiser_name) AS average
+FROM
+  `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+GROUP BY
+  advertiser_name
+ORDER BY
+  average DESC
 	```
 10. Which advertiser_name had the lowest average spend per ad that was at least above 0. 
 	``` 
-	[YOUR QUERY HERE]
+SELECT
+  advertiser_name,
+  SUM(spend_usd)/COUNT(advertiser_name) AS average
+FROM
+  `bigquery-public-data.google_political_ads.advertiser_weekly_spend`
+
+GROUP BY
+  advertiser_name
+  HAVING average > 0
+ORDER BY
+  average 
 	```
 ## For this next section, use the `new_york_citibike` datasets.
 
 1. Who went on more bike trips, Males or Females?
 	```
-	[YOUR QUERY HERE]
+SELECT
+  gender,
+  COUNT(gender)
+FROM
+  `bigquery-public-data.new_york_citibike.citibike_trips`
+GROUP BY
+  gender
 	```
 2. What was the average, shortest, and longest bike trip taken in minutes?
 	```
-	[YOUR QUERY HERE]
+SELECT
+  ROUND(MIN(tripduration)/60, 2) AS shortest,
+  ROUND(AVG(tripduration)/60, 2) AS average,
+  ROUND(MAX(tripduration)/60, 2) AS longest
+FROM
+  `bigquery-public-data.new_york_citibike.citibike_trips`
 	```
 
 3. Write a query that, for every station_name, has the amount of trips that started there and the amount of trips that ended there. (Hint, use two temporary tables, one that counts the amount of starts, the other that counts the number of ends, and then join the two.) 
 	```
-	[YOUR QUERY HERE]
+SELECT
+  `s` AS station,
+  `start`,
+  `end`
+FROM (
+  SELECT
+    start_station_name AS s,
+    COUNT(start_station_name ) AS start
+  FROM
+    `bigquery-public-data.new_york_citibike.citibike_trips`
+  GROUP BY
+    start_station_name )
+JOIN (
+  SELECT
+    end_station_name AS e,
+    COUNT(end_station_name ) AS `end`
+  FROM
+    `bigquery-public-data.new_york_citibike.citibike_trips`
+  GROUP BY
+    end_station_name)
+ON
+  s=e
 	```
 # The next section is the Google Colab section.  
 1. Open up this [this Colab notebook](https://colab.research.google.com/drive/1kHdTtuHTPEaMH32GotVum41YVdeyzQ74?usp=sharing).
@@ -179,5 +256,5 @@ Tom Steyer
 4. Click the 'Share' button on the top right.  
 5. Change the permissions so anyone with link can view. 
 6. Copy the link and paste it right below this line. 
-	* YOUR LINK:  ________________________________
+	* YOUR LINK:  https://colab.research.google.com/drive/1jHHciyz6qwJB5TH2F71QCzB3vy_wWFXI?usp=sharing
 9. Complete the two questions in the colab notebook file. 
